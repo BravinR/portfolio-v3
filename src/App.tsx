@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
-import { motion } from "motion/react";
-import { BookMarked, ChevronRight, Github, Twitter, Mail, Calendar, ArrowLeft } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { BookMarked, ChevronRight, Github, Twitter, Mail, Calendar, ArrowLeft, Copy, Check } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,6 +30,50 @@ const BOOKMARKS = [
   { title: "Lee Robinson", url: "https://leerob.io", description: "Developer relations at Vercel." },
   { title: "Josh W. Comeau", url: "https://joshwcomeau.com", description: "Interactive tutorials for developers." },
 ];
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy!", err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className="absolute right-3 top-3 p-2 rounded-lg bg-zinc-800/50 hover:bg-zinc-700/50 border border-zinc-700/50 text-zinc-400 hover:text-zinc-100 transition-all z-10"
+      aria-label="Copy code"
+    >
+      <AnimatePresence mode="wait">
+        {copied ? (
+          <motion.div
+            key="check"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+          >
+            <Check className="w-4 h-4 text-emerald-500" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="copy"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.5, opacity: 0 }}
+          >
+            <Copy className="w-4 h-4" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </button>
+  );
+}
 
 function Home() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -164,7 +210,39 @@ function Post() {
       </header>
 
       <div className="prose prose-zinc dark:prose-invert prose-emerald max-w-none">
-        <Markdown>{post.markdown}</Markdown>
+        <Markdown
+          components={{
+            code({ node, inline, className, children, ...props }: any) {
+              const match = /language-(\w+)/.exec(className || "");
+              const codeString = String(children).replace(/\n$/, "");
+              
+              return !inline && match ? (
+                <div className="relative group/code my-6">
+                  <CopyButton text={codeString} />
+                  <SyntaxHighlighter
+                    style={oneDark}
+                    language={match[1]}
+                    PreTag="div"
+                    className="rounded-xl !bg-zinc-900 !p-6 !m-0 border border-zinc-800"
+                    {...props}
+                  >
+                    {codeString}
+                  </SyntaxHighlighter>
+                </div>
+              ) : (
+                <code className={cn("bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded font-mono text-sm", className)} {...props}>
+                  {children}
+                </code>
+              );
+            },
+            // Override pre to avoid double wrapping
+            pre({ children }) {
+              return <>{children}</>;
+            }
+          }}
+        >
+          {post.markdown}
+        </Markdown>
       </div>
     </motion.div>
   );
