@@ -37,9 +37,11 @@ const XIcon = createLucideIcon("X", [
 ]);
 
 const BOOKMARKS = [
+  { title: "Password Generator", url: "https://password-generator.bravin.dev", description: "Generate secure passwords." },
+  { title: "VS Code Server", url: "https://codeserver.bravin.dev", description: "Run VS Code in a browser." },
+  { title: "Random Key gen", url: "https://randomkeygen.com/", description: "Generate secure random keys." },
   { title: "Overreacted", url: "https://overreacted.io", description: "Dan Abramov's personal blog." },
   { title: "Lee Robinson", url: "https://leerob.io", description: "Developer relations at Vercel." },
-  { title: "Josh W. Comeau", url: "https://joshwcomeau.com", description: "Interactive tutorials for developers." },
 ];
 
 function CopyButton({ text }: { text: string }) {
