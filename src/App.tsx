@@ -1,0 +1,188 @@
+import { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Link, useParams } from "react-router-dom";
+import Markdown from "react-markdown";
+import { motion } from "motion/react";
+import { BookMarked, ChevronRight, Github, Twitter, Mail, Calendar, ArrowLeft } from "lucide-react";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+interface Post {
+  slug: string;
+  title: string;
+  date: string;
+  description: string;
+}
+
+interface PostDetail {
+  title: string;
+  date: string;
+  markdown: string;
+}
+
+const BOOKMARKS = [
+  { title: "Overreacted", url: "https://overreacted.io", description: "Dan Abramov's personal blog." },
+  { title: "Lee Robinson", url: "https://leerob.io", description: "Developer relations at Vercel." },
+  { title: "Josh W. Comeau", url: "https://joshwcomeau.com", description: "Interactive tutorials for developers." },
+];
+
+function Home() {
+  const [posts, setPosts] = useState<Post[]>([]);
+
+  useEffect(() => {
+    fetch("/api/posts")
+      .then((res) => res.json())
+      .then(setPosts);
+  }, []);
+
+  return (
+    <div className="max-w-3xl mx-auto px-6 py-20">
+      <header className="mb-20">
+        <motion.h1 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-5xl font-bold tracking-tight mb-4"
+        >
+          John Doe
+        </motion.h1>
+        <motion.p 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-xl text-zinc-600 dark:text-zinc-400"
+        >
+          Software engineer, designer, and writer. Building things for the web.
+        </motion.p>
+        <div className="flex gap-4 mt-6">
+          <a href="#" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <Github className="w-5 h-5" />
+          </a>
+          <a href="#" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <Twitter className="w-5 h-5" />
+          </a>
+          <a href="#" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+            <Mail className="w-5 h-5" />
+          </a>
+        </div>
+      </header>
+
+      <section className="mb-20">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-8">Writing</h2>
+        <div className="space-y-12">
+          {posts.map((post, i) => (
+            <motion.article 
+              key={post.slug}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 + i * 0.1 }}
+            >
+              <Link to={`/${post.slug}`} className="group block">
+                <div className="flex justify-between items-baseline mb-2">
+                  <h3 className="text-xl font-medium group-hover:text-emerald-600 transition-colors">
+                    {post.title}
+                  </h3>
+                  <time className="text-sm text-zinc-400 font-mono">{post.date}</time>
+                </div>
+                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                  {post.description}
+                </p>
+              </Link>
+            </motion.article>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400 mb-8">Bookmarks</h2>
+        <div className="grid gap-4">
+          {BOOKMARKS.map((bookmark, i) => (
+            <motion.a
+              key={bookmark.url}
+              href={bookmark.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + i * 0.1 }}
+              className="p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800 hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 transition-all group flex items-start gap-4"
+            >
+              <div className="p-2 rounded-lg bg-zinc-50 dark:bg-zinc-900 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/30 transition-colors">
+                <BookMarked className="w-5 h-5 text-zinc-400 group-hover:text-emerald-600" />
+              </div>
+              <div>
+                <div className="flex items-center gap-1 font-medium">
+                  {bookmark.title}
+                  <ChevronRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                </div>
+                <p className="text-sm text-zinc-500">{bookmark.description}</p>
+              </div>
+            </motion.a>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Post() {
+  const { slug } = useParams();
+  const [post, setPost] = useState<PostDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(`/api/posts/${slug}`)
+      .then((res) => res.json())
+      .then((data) => {
+        setPost(data);
+        setLoading(false);
+      });
+  }, [slug]);
+
+  if (loading) return <div className="max-w-3xl mx-auto px-6 py-20 animate-pulse">Loading...</div>;
+  if (!post) return <div className="max-w-3xl mx-auto px-6 py-20">Post not found.</div>;
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="max-w-3xl mx-auto px-6 py-20"
+    >
+      <Link to="/" className="inline-flex items-center gap-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors mb-12 group">
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        Back to home
+      </Link>
+
+      <header className="mb-12">
+        <h1 className="text-4xl font-bold tracking-tight mb-4">{post.title}</h1>
+        <div className="flex items-center gap-2 text-zinc-400 font-mono text-sm">
+          <Calendar className="w-4 h-4" />
+          {post.date}
+        </div>
+      </header>
+
+      <div className="prose prose-zinc dark:prose-invert prose-emerald max-w-none">
+        <Markdown>{post.markdown}</Markdown>
+      </div>
+    </motion.div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-emerald-100 dark:selection:bg-emerald-900/30">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/:slug" element={<Post />} />
+        </Routes>
+        
+        <footer className="max-w-3xl mx-auto px-6 py-20 border-t border-zinc-100 dark:border-zinc-900 text-zinc-400 text-sm">
+          <p>© {new Date().getFullYear()} John Doe. All rights reserved.</p>
+        </footer>
+      </div>
+    </BrowserRouter>
+  );
+}
