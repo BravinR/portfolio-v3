@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import { motion, AnimatePresence } from "motion/react";
-import { BookMarked, ChevronRight, Github, Twitter, Mail, Calendar, ArrowLeft, Copy, Check } from "lucide-react";
+import { BookMarked, ChevronRight, Github, createLucideIcon, Mail, Calendar, ArrowLeft, Copy, Check } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -24,6 +24,17 @@ interface PostDetail {
   date: string;
   markdown: string;
 }
+
+const XIcon = createLucideIcon("X", [
+  [
+    "path",
+    {
+      d: "M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z",
+      stroke: "none",
+      fill: "currentColor",
+    },
+  ],
+]);
 
 const BOOKMARKS = [
   { title: "Overreacted", url: "https://overreacted.io", description: "Dan Abramov's personal blog." },
@@ -92,7 +103,7 @@ function Home() {
           animate={{ opacity: 1, y: 0 }}
           className="text-5xl font-bold tracking-tight mb-4"
         >
-          John Doe
+          Bravin Rutto
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 20 }}
@@ -107,7 +118,7 @@ function Home() {
             <Github className="w-5 h-5" />
           </a>
           <a href="#" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-            <Twitter className="w-5 h-5" />
+            <XIcon className="w-5 h-5" />
           </a>
           <a href="#" className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
             <Mail className="w-5 h-5" />
@@ -223,9 +234,8 @@ function Post() {
                     style={oneDark}
                     language={match[1]}
                     PreTag="div"
-                    className="rounded-xl !bg-zinc-900 !p-6 !m-0 border border-zinc-800"
-                    {...props}
-                  >
+                    className="rounded-xl p-6! m-0! border border-zinc-800"
+                    {...props}>
                     {codeString}
                   </SyntaxHighlighter>
                 </div>
@@ -258,7 +268,7 @@ export default function App() {
         </Routes>
         
         <footer className="max-w-3xl mx-auto px-6 py-20 border-t border-zinc-100 dark:border-zinc-900 text-zinc-400 text-sm">
-          <p>© {new Date().getFullYear()} John Doe. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Bravin Rutto. All rights reserved.</p>
         </footer>
       </div>
     </BrowserRouter>
